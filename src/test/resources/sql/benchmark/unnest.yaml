@@ -3,6 +3,7 @@ query: |
        mapping AS (
            SELECT
                id record_id,
+               name,
                unnested_id.id as unnested_id
            FROM
                `catalog.jaffle_shop.nested_table`,
