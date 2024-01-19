@@ -73,6 +73,7 @@ From any arbitrary BigQuery query, you will get the following outputs:
   there still might be some edge cases that suddenly are not covered. SQL is hard.
 * It doesn't work with `TVF` (Table Valued Functions) - although ZetaSQL parses it, the output 
   won't show the columns of the TVF.
+* Automatically infer UDFs - they have to be defined as part of the script that is going to be parsed.
 
 ## How to use
 The folder `/src/test/examples` has multiple examples of how to use this parser. The main caveat 
