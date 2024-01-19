@@ -1,0 +1,63 @@
+query: |
+  SELECT TIMESTAMP_TRUNC(TIMESTAMP(PARSE_DATETIME('%Y%m%d',_TABLE_SUFFIX)), MINUTE) time,
+              CONCAT(id, '-', other_id) as metric,
+              value,
+              PARSE_DATETIME('%Y%m%d',_TABLE_SUFFIX) + INTERVAL 1 DAY AS next_day,
+        FROM `catalog.jaffle_shop.timestamps`
+        WHERE source = "blabla"
+        AND _TABLE_SUFFIX BETWEEN FORMAT_DATE("%Y%m%d", DATE_SUB(CURRENT_DATE(), INTERVAL 14 DAY)) AND FORMAT_DATE("%Y%m%d", CURRENT_DATE())
+        ORDER BY 1
+
+expected_output:
+  name: "timestamps"
+  output_columns:
+    - name: "time"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "_TABLE_SUFFIX"
+    - name: "metric"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "id"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "other_id"
+    - name: "value"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "value"
+    - name: "next_day"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "_TABLE_SUFFIX"
+  other_scanned_columns:
+    - name: "_time_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "_TABLE_SUFFIX"
+    - name: "_source_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "source"
+    - name: "__TABLE_SUFFIX_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "_TABLE_SUFFIX"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.timestamps"

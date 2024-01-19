@@ -1,0 +1,143 @@
+query: |
+  
+  WITH base AS ( SELECT *
+  FROM (SELECT clmn1_, SUM(clmn2_) AS clmn100000_
+        FROM (SELECT *
+              FROM (SELECT t0.cost AS clmn2_, t0.date AS clmn0_, t0.anothernesting AS clmn1_
+                    FROM (WITH base
+                                   AS (SELECT DATE_TRUNC(DATE(anotherdate), DAY) AS date, rescordenesed.anothernesting, ARRAY_TO_STRING(ARRAY(
+                              SELECT
+                              value
+                              FROM
+                              UNNEST(labels)
+                              WHERE
+                              key = "goog-resource-type"
+                              ), " ") AS resource_type, first_name, SUM (cost) AS cost
+                          FROM
+                              `catalog.jaffle_shop.nested_table`
+                          WHERE
+                              DATE (_PARTITIONTIME)
+                              > DATE_SUB(`CURRENT_DATE`()
+                              , INTERVAL 62 day)
+                            AND acolumn.id IN ("blabla"
+                              , "bloblob")
+                          GROUP BY 1, 2, 3, 4) SELECT
+    date,
+    anothernesting,
+    SUM(cost) AS cost
+                    FROM
+                        base
+                    GROUP BY 1, 2) t0)
+        WHERE ((clmn0_ >= DATE "2023-12-13") AND (clmn0_ <= DATE "2024-01-11")))
+  GROUP BY clmn1_ ) LIMIT 20000000), final2 AS(
+  
+  select STRUCT( clmn100000_ as description, clmn1_ as cost) as clmn0_ from base
+  WHERE (clmn100000_ > 0)
+  ), otherfinal AS(
+  
+  SELECT clmn0_.description,
+  ARRAY_AGG(STRUCT(clmn0_.cost,
+  clmn0_.description)) AS clmn0_
+  from final2
+  GROUP BY 1
+  ), another AS (
+  
+  select otherfinal.description,cost,c.description AS description2 from otherfinal,unnest(clmn0_) as c
+  WHERE (c.cost > "0")
+  ), another3 AS(
+  select STRUCT(description,cost,description2 AS other) as test from another
+  ), final2323 AS(
+  
+  select test.description, ARRAY_AGG(STRUCT(test.cost,test.other)) as test3 from another3
+  group by 1
+  )
+  select * from final2323,UNNEST(test3) as unnested_test
+
+expected_output:
+  name: "looker subquery but with a lot of nesting and random stuff"
+  output_columns:
+    - name: "description"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+    - name: "test3.cost"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting"
+    - name: "test3.other"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting"
+    - name: "cost"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting"
+    - name: "other"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting"
+  other_scanned_columns:
+    - name: "_acolumn.id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "acolumn.id"
+    - name: "_c.cost_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting"
+    - name: "__PARTITIONTIME_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "_PARTITIONTIME"
+    - name: "_date_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "anotherdate"
+    - name: "_clmn100000__"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.nested_table"
+

@@ -1,0 +1,81 @@
+query: |
+    CREATE TEMP FUNCTION
+     decode(base STRING)
+     RETURNS STRING
+     LANGUAGE js AS """
+       placeholder = '0000000000000000000000';
+     """ OPTIONS ( library=[ "..." ] );
+    
+    CREATE TABLE temp.table AS(
+     WITH
+         mapping AS (
+             SELECT
+                 id record_id,
+                 unnested_id.id as unnested_id
+             FROM
+                 `catalog.jaffle_shop.nested_table`,
+                 UNNEST(nested_ids) unnested_id ),
+         mapping_2 AS (
+             SELECT
+                 *,
+                 decode(RIGHT(content.id, 1)) unnested_id
+             FROM
+                 `catalog.jaffle_shop.struct_table`)
+     SELECT
+         mapping.record_id AS record_id,
+         ARRAY_AGG(DISTINCT content.id ) AS agg_content,
+         count( distinct content.id) AS count_content
+     FROM
+         mapping
+             LEFT JOIN
+         mapping_2
+         USING
+             (unnested_id)
+     GROUP BY 1
+     ORDER BY 3 desc
+    )
+
+expected_output:
+  name: "unnest_create"
+  output_columns:
+    - name: "record_id"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.id"
+    - name: "agg_content"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.id"
+    - name: "count_content"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.id"
+  other_scanned_columns:
+    - name: "_unnested_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.id"
+    - name: "_unnested_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.id"
+    - name: "_count_content_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.id"
+  type: "create"
+  selected_tables:
+    - "catalog.jaffle_shop.struct_table"
+    - "catalog.jaffle_shop.nested_table"

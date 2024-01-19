@@ -1,0 +1,57 @@
+query: |
+  with source as (
+  
+  
+     select * from `catalog.jaffle_shop.stg_payments`
+  
+  )
+  SELECT * FROM
+  (SELECT payment_method,amount FROM source)
+  PIVOT(SUM(amount) FOR payment_method IN ('card', 'cash', 'bank_transfer', 'other'))
+
+expected_output:
+  name: "pivot"
+  output_columns:
+    - name: "card"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "amount"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "payment_method"
+    - name: "cash"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "amount"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "payment_method"
+    - name: "bank_transfer"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "amount"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "payment_method"
+    - name: "other"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "amount"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "payment_method"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.stg_payments"

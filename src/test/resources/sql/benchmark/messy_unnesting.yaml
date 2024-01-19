@@ -1,0 +1,74 @@
+
+query: |
+    WITH base AS(
+      SELECT
+         SUM((
+             SELECT
+                 SUM(c.amount)
+             FROM
+                 UNNEST(nested_ids) c)) AS net_cost
+      FROM `catalog.jaffle_shop.nested_table`
+    
+    ),
+    
+     weird AS(
+      SELECT
+       *
+      FROM `catalog.jaffle_shop.nested_table` LEFT JOIN UNNEST(nested_ids) c
+    ), join_random AS(
+    
+    select * from base
+    FULL outer join weird on base.net_cost = weird.amount
+    )
+    select 
+    STRUCT(net_cost AS net_cost, STRUCT (first_name as first_name, last_name as last_name, COALESCE
+    (last_name,first_name) AS full_name) AS random_struct) AS key
+    from join_random
+
+expected_output:
+  name: "messy_unnesting"
+  output_columns:
+    - name: "key.net_cost"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.amount"
+    - name: "key.random_struct.first_name"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "first_name"
+    - name: "key.random_struct.last_name"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "last_name"
+    - name: "key.random_struct.full_name"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "first_name"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "last_name"
+  other_scanned_columns:
+    - name: "_amount_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.amount"
+    - name: "_net_cost_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.amount"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.nested_table"

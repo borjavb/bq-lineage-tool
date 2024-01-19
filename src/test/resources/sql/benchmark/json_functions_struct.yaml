@@ -1,0 +1,47 @@
+query: |
+  with base as(
+    SELECT
+        JSON_EXTRACT(json_field, '$.class') AS class,
+        JSON_EXTRACT_SCALAR(json_field, '$.class.other') AS class_other,
+        JSON_EXTRACT_ARRAY(json_field, '$.class.nested_array') AS class_nested,
+        id,
+    FROM `catalog.jaffle_shop.json_table`
+  )
+  
+  SELECT
+  STRUCT(id as id, class as class) key,
+  class_other,
+  nested_classes,
+  from base,unnest(class_nested) as nested_classes
+
+
+expected_output:
+  name: "json_functions"
+  output_columns:
+    - name: "key.id"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "json_table"
+          name: "id"
+    - name: "key.class"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "json_table"
+          name: "json_field"
+    - name: "class_other"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "json_table"
+          name: "json_field"
+    - name: "nested_classes"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "json_table"
+          name: "json_field"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.json_table"

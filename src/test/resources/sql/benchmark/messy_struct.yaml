@@ -1,0 +1,51 @@
+query: |
+  WITH two AS(
+  
+  select 
+  STRUCT( STRUCT(content.subnested_id.sub_b AS b, content.id AS content, "asdfs23ad" as  literal2) AS 
+  nested_nes) test, 
+  from `catalog.jaffle_shop.struct_table`
+  ), three as(
+  select STRUCT(test) as testing2 from two
+  
+  ), four as (
+  SELECT STRUCT(testing2.test.nested_nes.b as ac, "asdfsad" as literal) AS messy_struct,
+  LEAD(testing2.test.nested_nes.b)
+  OVER (PARTITION BY testing2.test.nested_nes.content ORDER BY testing2.test.nested_nes.b ASC) AS 
+  next_name,
+  
+  FROM three
+  WHERE testing2.test.nested_nes.b = "a"
+  )
+  select * from four
+
+expected_output:
+  name: "messy_struct"
+  output_columns:
+    - name: "messy_struct.ac"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.subnested_id.sub_b"
+    - name: "messy_struct.literal"
+    - name: "next_name"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.subnested_id.sub_b"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.id"
+  other_scanned_columns:
+    - name: "_testing2.test.nested_nes.b_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.subnested_id.sub_b"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.struct_table"

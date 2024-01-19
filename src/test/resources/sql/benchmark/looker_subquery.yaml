@@ -1,0 +1,71 @@
+query: |
+  
+  SELECT *
+  FROM (SELECT clmn1_, SUM(clmn2_) AS clmn100000_
+        FROM (SELECT *
+              FROM (SELECT t0.cost AS clmn2_, t0.date AS clmn0_, t0.anothernesting AS clmn1_
+                    FROM (WITH base
+                                   AS (SELECT DATE_TRUNC(DATE(anotherdate), DAY) AS date, rescordenesed.anothernesting, ARRAY_TO_STRING(ARRAY(
+                              SELECT
+                              value
+                              FROM
+                              UNNEST(labels)
+                              WHERE
+                              key = "goog-resource-type"
+                              ), " ") AS resource_type, first_name, SUM (cost) AS cost
+                          FROM
+                              `catalog.jaffle_shop.nested_table`
+                          WHERE
+                              DATE (_PARTITIONTIME)
+                              > DATE_SUB(`CURRENT_DATE`()
+                              , INTERVAL 62 day)
+                            AND acolumn.id IN ("blabla"
+                              , "bloblob")
+                          GROUP BY 1, 2, 3, 4) SELECT
+    date,
+    anothernesting,
+    SUM(cost) AS cost
+                    FROM
+                        base
+                    GROUP BY 1, 2) t0)
+        WHERE ((clmn0_ >= DATE "2023-12-13") AND (clmn0_ <= DATE "2024-01-11")))
+  GROUP BY clmn1_ ) LIMIT 20000000
+
+expected_output:
+  name: "messy_struct"
+  output_columns:
+    - name: "clmn1_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting"
+    - name: "clmn100000_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+  other_scanned_columns:
+    - name: "_acolumn.id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "acolumn.id"
+    - name: "__PARTITIONTIME_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "_PARTITIONTIME"
+    - name: "_date_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "anotherdate"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.nested_table"
+

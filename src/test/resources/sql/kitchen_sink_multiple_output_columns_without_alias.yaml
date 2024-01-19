@@ -1,0 +1,54 @@
+query: |
+    #standardSQL
+    SELECT
+        CONCAT(tA.colA, tB.colB) as joined_column,
+        tA.colA as columnA,
+        tB.colB
+    FROM
+        `project1.datasetA.TableA` as tA
+            LEFT OUTER JOIN
+        `project2.datasetB.TableB` as tB
+        USING (colC)
+
+expected_output:
+  name: "json_functions"
+  output_columns:
+    - name: "joined_column"
+      references:
+        - project_name: "project1"
+          dataset_name: "datasetA"
+          table_name: "TableA"
+          name: "colA"
+        - project_name: "project2"
+          dataset_name: "datasetB"
+          table_name: "TableB"
+          name: "colB"
+    - name: "columnA"
+      references:
+        - project_name: "project1"
+          dataset_name: "datasetA"
+          table_name: "TableA"
+          name: "colA"
+    - name: "colB"
+      references:
+        - project_name: "project2"
+          dataset_name: "datasetB"
+          table_name: "TableB"
+          name: "colB"
+  other_scanned_columns:
+    - name: "_colC_"
+      references:
+        - project_name: "project1"
+          dataset_name: "datasetA"
+          table_name: "TableA"
+          name: "colC"
+    - name: "_colC_"
+      references:
+        - project_name: "project2"
+          dataset_name: "datasetB"
+          table_name: "TableB"
+          name: "colC"
+  type: "select"
+  selected_tables:
+    - "project1.datasetA.TableA"
+    - "project2.datasetB.TableB"

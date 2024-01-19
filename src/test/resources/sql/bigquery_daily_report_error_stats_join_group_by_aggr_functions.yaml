@@ -1,0 +1,54 @@
+query: |
+    #standardSQL
+    SELECT
+    report.partner_id,
+    SUM(num_lines) AS total_lines,
+    SUM(status_200) AS total_200
+    FROM
+    `myproject.reporting.daily_report` as report
+        LEFT OUTER JOIN
+    `myproject.reporting.error_stats` as stats
+    USING
+        (partner_id)
+    GROUP BY
+    partner_id
+
+expected_output:
+  name: "json_functions"
+  output_columns:
+    - name: "partner_id"
+      references:
+        - project_name: "myproject"
+          dataset_name: "reporting"
+          table_name: "daily_report"
+          name: "partner_id"
+    - name: "total_lines"
+      references:
+        - project_name: "myproject"
+          dataset_name: "reporting"
+          table_name: "daily_report"
+          name: "num_lines"
+    - name: "total_200"
+      references:
+        - project_name: "myproject"
+          dataset_name: "reporting"
+          table_name: "error_stats"
+          name: "status_200"
+  other_scanned_columns:
+    - name: "_partner_id_"
+      references:
+        - project_name: "myproject"
+          dataset_name: "reporting"
+          table_name: "daily_report"
+          name: "partner_id"
+    - name: "_partner_id_"
+      references:
+        - project_name: "myproject"
+          dataset_name: "reporting"
+          table_name: "error_stats"
+          name: "partner_id"
+  type: "select"
+  selected_tables:
+    - "myproject.reporting.error_stats"
+    - "myproject.reporting.daily_report"
+

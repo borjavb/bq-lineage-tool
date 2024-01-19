@@ -1,0 +1,54 @@
+query: |
+  with source as (
+  
+
+     select * from `catalog.jaffle_shop.raw_payments`
+  
+  ),
+  
+  renamed as (
+  
+  select
+  id as payment_id,
+  order_id,
+  payment_method,
+  
+  -- `amount` is currently stored in cents, so we convert it to dollars
+  amount / 100 as amount
+  
+  from source
+  
+  )
+  
+  select * from renamed
+
+expected_output:
+  name: "stg_payments"
+  output_columns:
+    - name: "payment_id"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_payments"
+          name: "id"
+    - name: "order_id"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_payments"
+          name: "order_id"
+    - name: "payment_method"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_payments"
+          name: "payment_method"
+    - name: "amount"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_payments"
+          name: "amount"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.raw_payments"

@@ -1,0 +1,22 @@
+query: |
+  with source as (
+  
+
+     select * from `catalog.jaffle_shop.raw_payments`
+  
+  )
+  
+  select id as payment_id from source
+
+expected_output:
+  name: "select_prune"
+  output_columns:
+    - name: "payment_id"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_payments"
+          name: "id"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.raw_payments"

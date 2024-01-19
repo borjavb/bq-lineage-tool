@@ -1,0 +1,137 @@
+query: |
+    WITH pc AS (
+        SELECT
+            DISTINCT
+            triplenest.secondnesting.d as user_id,
+            triplenest.secondnesting.firstnesting.c as model,
+            triplenest.secondnesting.firstnesting.b as manufacturer
+        FROM
+            `catalog.jaffle_shop.multiplenests`
+        WHERE _TABLE_SUFFIX BETWEEN '20231001' AND '20231231'
+    ), pd AS (
+        SELECT
+            DISTINCT rescordenesed.anothernesting23 AS user_id
+        FROM
+            `catalog.jaffle_shop.nested_table`
+        WHERE _TABLE_SUFFIX BETWEEN '20231001' AND '20231231'
+    ),
+    
+         sub AS (
+             SELECT
+                 pc.user_id AS closed_uid,
+                 pd.user_id AS discovered_uid,
+                 triplenest.secondnesting.d AS reporting_country,
+                 model,
+                 manufacturer
+             FROM
+                 pc
+                     FULL JOIN
+                 pd ON pd.user_id = pc.user_id
+                     LEFT JOIN
+                 `catalog.jaffle_shop.multiplenests` s ON COALESCE(pc.user_id, pd.user_id) = s.triplenest.secondnesting.d
+         )
+    
+    SELECT
+        reporting_country,
+        ARRAY_AGG(
+                STRUCT(
+                        model,
+                        manufacturer,
+                        closed,
+                        discovered,
+                        IEEE_DIVIDE(closed, discovered) AS ratio)
+                    ORDER BY
+          closed DESC LIMIT 5) AS devices
+    FROM
+        (
+            SELECT
+                reporting_country,
+                model,
+                manufacturer,
+                COUNT(DISTINCT closed_uid) AS closed,
+                COUNT(DISTINCT discovered_uid) AS discovered,
+            FROM sub
+            GROUP BY 1,2,3
+        )
+    GROUP BY
+        1
+
+expected_output:
+  name: "array_agg_multiplenests"
+  output_columns:
+    - name: "reporting_country"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.d"
+    - name: "devices.model"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.firstnesting.c"
+    - name: "devices.manufacturer"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.firstnesting.b"
+    - name: "devices.closed"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.d"
+    - name: "devices.discovered"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting23"
+    - name: "devices.ratio"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.d"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting23"
+  other_scanned_columns:
+    - name: "_user_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.d"
+    - name: "_triplenest.secondnesting.d_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.d"
+    - name: "__TABLE_SUFFIX_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "_TABLE_SUFFIX"
+    - name: "_user_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting23"
+    - name: "__TABLE_SUFFIX_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "_TABLE_SUFFIX"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.multiplenests"
+    - "catalog.jaffle_shop.nested_table"
+

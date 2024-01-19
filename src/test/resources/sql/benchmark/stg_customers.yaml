@@ -1,0 +1,55 @@
+query: |
+    with source as (
+
+    select * from `catalog.jaffle_shop.raw_customers`
+
+        ),
+
+    renamed as (
+
+        select
+            id as customer_id,
+            first_name,
+            last_name,
+            COALESCE(last_name, first_name) as full_name,
+
+        from source
+
+    )
+
+    select * from renamed
+
+expected_output:
+  name: "stg_customers"
+  output_columns:
+    - name: "customer_id"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_customers"
+          name: "id"
+    - name: "first_name"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_customers"
+          name: "first_name"
+    - name: "last_name"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_customers"
+          name: "last_name"
+    - name: "full_name"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_customers"
+          name: "last_name"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "raw_customers"
+          name: "first_name"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.raw_customers"

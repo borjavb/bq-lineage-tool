@@ -1,0 +1,89 @@
+query: |
+  SELECT
+      acolumn.id as project_id,
+      rescordenesed.anothernesting AS job_id,
+      rescordenesed.anothernesting2 as full_asset_name,
+      ARRAY_TO_STRING(ARRAY(SELECT CONCAT(key,':',value) FROM UNNEST(labels)), ",") as labels,
+      SUM(cost) + COALESCE(SUM(( SELECT SUM(c.amount) FROM UNNEST(nested_ids) AS c)), 0.1) AS cost
+  FROM
+      `catalog.jaffle_shop.nested_table`
+  WHERE
+          TIMESTAMP_TRUNC(_PARTITIONTIME, DAY) >= TIMESTAMP("2024-01-01")
+    AND rescordenesed.anothernesting23 = 'this is a filter string'
+    
+    GROUP BY
+    1,
+    2,
+    3,
+    4
+    ORDER BY 5 DESC
+
+expected_output:
+  name: "subquery_unnest"
+  output_columns:
+    - name: "project_id"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "acolumn.id"
+    - name: "job_id"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting"
+    - name: "full_asset_name"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting2"
+    - name: "labels"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "labels.key"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "labels.value"
+    - name: "cost"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.amount"
+  other_scanned_columns:
+    - name: "_cost_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.amount"
+    - name: "_rescordenesed.anothernesting23_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "rescordenesed.anothernesting23"
+    - name: "__PARTITIONTIME_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "_PARTITIONTIME"
+  type: "select"
+  selected_tables:
+    - "catalog.jaffle_shop.nested_table"
+
+
