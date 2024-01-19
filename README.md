@@ -12,12 +12,12 @@ materialisation of a field.
 
 From any arbitrary BigQuery query, you will get the following outputs:
 - `output_columns`: The columns that are part of the output of the query, with all the input 
-  queries that were needed to produce them.
+  columns references that were needed to produce them.
 - `Other_scanned_columns`: Some columns are only used in filters, joins... these columns might 
   never be end up being part of the output of the query, but they are still used in the query. 
-  A list of all these columns will be also part of the output of the parser. Note that this list 
+  A list of all these columns will be also part of the output of the parser with the respected input references. Note that this list 
   might have duplicates, as the same column might be used in multiple operations.
-- `selected_tables`: A list of all the tables that are used in the query.
+- `selected_tables`: A list of all the tables that were selected in the query.
 - `Type`: The type of sql statement `{SELECT, CREATE_VIEW, MERGE...}`
 
 ![image](./flow.png)
