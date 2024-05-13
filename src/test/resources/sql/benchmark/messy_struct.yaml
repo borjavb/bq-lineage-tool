@@ -39,13 +39,15 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "struct_table"
           name: "content.id"
-  other_scanned_columns:
+  filters_groupbys_and_other_columns:
     - name: "_testing2.test.nested_nes.b_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "struct_table"
           name: "content.subnested_id.sub_b"
+          used_for:
+            - "FILTER"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.struct_table"

@@ -56,25 +56,43 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "struct_table"
           name: "content.id"
-  other_scanned_columns:
-    - name: "_unnested_id_"
+  filters_groupbys_and_other_columns:
+    - name: "_record_id_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
           name: "nested_ids.id"
-    - name: "_unnested_id_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "struct_table"
-          name: "content.id"
+          used_for:
+            - "GROUP_BY"
     - name: "_count_content_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "struct_table"
           name: "content.id"
+          used_for:
+            - "ORDER_BY"
+  joins:
+    - join_type: "LEFT"
+      left_columns:
+        - name: "unnested_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "nested_table"
+              name: "nested_ids.id"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+      right_columns:
+        - name: "unnested_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "struct_table"
+              name: "content.id"
+              used_for:
+                - "JOIN_RIGHT_TABLE"
   type: "create"
   selected_tables:
     - "catalog.jaffle_shop.struct_table"

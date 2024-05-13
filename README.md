@@ -13,10 +13,11 @@ materialisation of a field.
 From any arbitrary BigQuery query, you will get the following outputs:
 - `output_columns`: The columns that are part of the output of the query, with all the input 
   columns references that were needed to produce them.
-- `Other_scanned_columns`: Some columns are only used in filters, joins... these columns might 
+- `filters_groupbys_and_other_columns`: Some columns are only used in filters... these columns might 
   never be end up being part of the output of the query, but they are still used in the query. 
   A list of all these columns will be also part of the output of the parser with the respected input references. Note that this list 
   might have duplicates, as the same column might be used in multiple operations.
+- `joins`: List of joins used in the query, considering the columns used for the join
 - `selected_tables`: A list of all the tables that were selected in the query.
 - `Type`: The type of sql statement `{SELECT, CREATE_VIEW, MERGE...}`
 
@@ -136,7 +137,7 @@ output_columns:
   references:
   - project_name: "bigquery-public-data.samples.shakespeare"
     column_name: "word_count"
-other_scanned_columns:
+filters_groupbys_and_other_columns:
 - name: "_word_"
   references:
   - project_name: "bigquery-public-data.samples.shakespeare"

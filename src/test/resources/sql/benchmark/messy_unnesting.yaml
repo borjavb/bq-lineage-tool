@@ -56,19 +56,27 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
           name: "last_name"
-  other_scanned_columns:
-    - name: "_amount_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "nested_table"
-          name: "nested_ids.amount"
-    - name: "_net_cost_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "nested_table"
-          name: "nested_ids.amount"
+  filters_groupbys_and_other_columns: [ ]
+  joins:
+    - join_type: "FULL"
+      left_columns:
+        - name: "net_cost"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "nested_table"
+              name: "nested_ids.amount"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+      right_columns:
+        - name: "amount"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "nested_table"
+              name: "nested_ids.amount"
+              used_for:
+                - "JOIN_RIGHT_TABLE"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.nested_table"

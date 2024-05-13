@@ -99,39 +99,111 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
           name: "rescordenesed.anothernesting23"
-  other_scanned_columns:
+  filters_groupbys_and_other_columns:
     - name: "_user_id_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "multiplenests"
           name: "triplenest.secondnesting.d"
-    - name: "_triplenest.secondnesting.d_"
+          used_for:
+            - "GROUP_BY"
+    - name: "_manufacturer_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "multiplenests"
-          name: "triplenest.secondnesting.d"
+          name: "triplenest.secondnesting.firstnesting.b"
+          used_for:
+            - "GROUP_BY"
     - name: "__TABLE_SUFFIX_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "multiplenests"
           name: "_TABLE_SUFFIX"
+          used_for:
+            - "FILTER"
     - name: "_user_id_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
           name: "rescordenesed.anothernesting23"
+          used_for:
+            - "GROUP_BY"
+    - name: "_reporting_country_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.d"
+          used_for:
+            - "GROUP_BY"
+    - name: "_model_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "multiplenests"
+          name: "triplenest.secondnesting.firstnesting.c"
+          used_for:
+            - "GROUP_BY"
     - name: "__TABLE_SUFFIX_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
           name: "_TABLE_SUFFIX"
+          used_for:
+            - "FILTER"
+  joins:
+    - join_type: "LEFT"
+      left_columns:
+        - name: "user_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "multiplenests"
+              name: "triplenest.secondnesting.d"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+        - name: "user_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "nested_table"
+              name: "rescordenesed.anothernesting23"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+      right_columns:
+        - name: "triplenest.secondnesting.d"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "multiplenests"
+              name: "triplenest.secondnesting.d"
+              used_for:
+                - "JOIN_RIGHT_TABLE"
+    - join_type: "FULL"
+      left_columns:
+        - name: "user_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "multiplenests"
+              name: "triplenest.secondnesting.d"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+      right_columns:
+        - name: "user_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "nested_table"
+              name: "rescordenesed.anothernesting23"
+              used_for:
+                - "JOIN_RIGHT_TABLE"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.multiplenests"
     - "catalog.jaffle_shop.nested_table"
-

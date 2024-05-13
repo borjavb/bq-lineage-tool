@@ -70,49 +70,63 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "stg_payments"
           name: "payment_method"
-  other_scanned_columns:
+  filters_groupbys_and_other_columns:
     - name: "__literal__"
       references:
         - table_name: "_literal_"
           name: "_literal_"
           literal_value:
             - "card"
+          used_for:
+            - "FILTER"
     - name: "__literal__"
       references:
         - table_name: "_literal_"
           name: "_literal_"
           literal_value:
             - "cash"
+          used_for:
+            - "FILTER"
     - name: "__literal__"
       references:
         - table_name: "_literal_"
           name: "_literal_"
           literal_value:
             - "bank_transfer"
+          used_for:
+            - "FILTER"
     - name: "__literal__"
       references:
         - table_name: "_literal_"
           name: "_literal_"
           literal_value:
             - "other"
+          used_for:
+            - "FILTER"
     - name: "__literal__"
       references:
         - table_name: "_literal_"
           name: "_literal_"
           literal_value:
             - "100000.0"
+          used_for:
+            - "FILTER"
     - name: "_payment_method_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "stg_payments"
           name: "payment_method"
+          used_for:
+            - "FILTER"
     - name: "_amount_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "stg_payments"
           name: "amount"
+          used_for:
+            - "FILTER"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.stg_payments"

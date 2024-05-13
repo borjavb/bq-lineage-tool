@@ -16,6 +16,7 @@ public class ResolvedNodeExtended {
     public String type;
     public String table_name;
     public List selected_tables = new ArrayList();
+    public List<ResolvedJoinExtended> joins = new ArrayList<>();
 
 
 

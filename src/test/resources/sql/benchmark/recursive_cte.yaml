@@ -13,11 +13,29 @@ expected_output:
       references:
         - table_name: "$union_all"
           name: "n"
-  other_scanned_columns:
+  filters_groupbys_and_other_columns:
     - name: "_n_"
       references:
         - table_name: "$union_all"
           name: "n"
+          used_for:
+            - "ORDER_BY"
+  joins:
+    - join_type: "INNER"
+      left_columns:
+        - name: "n"
+          references:
+            - table_name: "$union_all"
+              name: "n"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+      right_columns:
+        - name: "n"
+          references:
+            - table_name: "$union_all"
+              name: "n"
+              used_for:
+                - "JOIN_RIGHT_TABLE"
   type: "select"
   selected_tables:
     - "$union_all"

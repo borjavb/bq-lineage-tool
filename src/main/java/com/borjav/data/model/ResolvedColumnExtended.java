@@ -3,18 +3,26 @@ package com.borjav.data.model;
 import com.google.zetasql.Type;
 import com.google.zetasql.resolvedast.ResolvedColumn;
 
+import com.google.zetasql.resolvedast.ResolvedJoinScanEnums;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+
 public class ResolvedColumnExtended {
+
+    public enum EXTRACOLUMNS { FILTER, GROUP_BY, ORDER_BY, JOIN_LEFT_TABLE, JOIN_RIGHT_TABLE,
+        PARTITION_BY_ANALYTIC_FUNCTION,ORDER_BY_ANALYTIC_FUNCTION}
+
 
     public String name;
     public String tableName;
     public Long indexOriginalTable;
     public Long resolvedIndex;
     public List<ResolvedColumnExtended> columnsReferenced = new ArrayList<>();
-
+    public HashSet<EXTRACOLUMNS> usedFor;
+    public ResolvedJoinScanEnums.JoinType joinType;
     public Type type;
     public String literalValue;
 
@@ -34,6 +42,8 @@ public class ResolvedColumnExtended {
         this.resolvedIndex = resolvedColumn.getId();
         this.indexOriginalTable = indexOriginalTable;
         this.type = resolvedColumn.getType();
+        this.usedFor = new HashSet<>();
+        this.joinType = null;
     }
 
 
@@ -45,14 +55,19 @@ public class ResolvedColumnExtended {
         this.resolvedIndex = resolvedIndex;
         this.type= null;
         this.literalValue = literalValue;
+        this.usedFor = new HashSet<>();
+        this.joinType = null;
     }
 
     public ResolvedColumnExtended(String name, String tableName, Long indexOriginalTable,
-                                  Long resolvedIndex, Type type, Long resolvedSubIndex) {
+                                  Long resolvedIndex, Type type, Long resolvedSubIndex,
+                                  HashSet<EXTRACOLUMNS> usedFor, ResolvedJoinScanEnums.JoinType joinType) {
         this.name = name;
         this.tableName = tableName;
         this.indexOriginalTable = indexOriginalTable;
         this.resolvedIndex = resolvedIndex;
         this.type= type;
+        this.usedFor = usedFor;
+        this.joinType = joinType;
     }
 }

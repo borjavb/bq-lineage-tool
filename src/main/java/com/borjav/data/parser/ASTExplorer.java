@@ -4,6 +4,7 @@ package com.borjav.data.parser;
 import static com.borjav.data.utils.UtilsParser.getLiteral;
 
 import com.borjav.data.model.ResolvedColumnExtended;
+import com.borjav.data.model.ResolvedJoinExtended;
 import com.borjav.data.model.ResolvedNodeExtended;
 import com.google.common.collect.ImmutableList;
 import com.google.zetasql.ArrayType;
@@ -14,11 +15,13 @@ import com.google.zetasql.StructType;
 import com.google.zetasql.ZetaSQLFunctions;
 import com.google.zetasql.ZetaSQLType;
 import com.google.zetasql.resolvedast.ResolvedColumn;
+import com.google.zetasql.resolvedast.ResolvedJoinScanEnums;
 import com.google.zetasql.resolvedast.ResolvedNode;
 import com.google.zetasql.resolvedast.ResolvedNodes;
 import com.google.zetasql.resolvedast.ResolvedNodes.ResolvedStatement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,6 +35,7 @@ public class ASTExplorer {
   private final SimpleCatalog catalog;
 
   private final AtomicInteger anonymFieldCounter = new AtomicInteger(0);
+  private final List<ResolvedJoinExtended> joins = new ArrayList<>();
 
   public ASTExplorer(SimpleCatalog catalog) {
     this.catalog = catalog;
@@ -94,6 +98,7 @@ public class ASTExplorer {
 
   public ResolvedNodeExtended resolve(ResolvedStatement stmt) {
     ResolvedNodeExtended table = checkNodeType(stmt);
+    table.joins = joins;
     return simplifyTable(table);
   }
 
@@ -142,7 +147,7 @@ public class ASTExplorer {
                           column.getColumn().getId(),
                           (long) node.getOutputColumnList().indexOf(column),
                           column.getColumn().getType(),
-                          0L);
+                          0L, new HashSet<>(), null);
                   sourceColumn.indexStructList = unnestedColumn.indexStructList;
                   sourceColumn.originalIndexStructList = unnestedColumn.originalIndexStructList;
                   sourceColumn.makeStructIndex = unnestedColumn.makeStructIndex;
@@ -158,7 +163,7 @@ public class ASTExplorer {
                         column.getColumn().getId(),
                         (long) node.getOutputColumnList().indexOf(column),
                         column.getColumn().getType(),
-                        0L);
+                        0L,new HashSet<>(), null);
                 outputColumn.columnsReferenced.add(deepCloner(sourceColumn));
                 withColumns.add(outputColumn);
               }
@@ -225,7 +230,7 @@ public class ASTExplorer {
                           column.getColumn().getId(),
                           (long) node.getOutputColumnList().indexOf(column),
                           column.getColumn().getType(),
-                          0L);
+                          0L,new HashSet<>(), null);
                   sourceColumn.indexStructList = unnestedColumn.indexStructList;
                   sourceColumn.originalIndexStructList = unnestedColumn.originalIndexStructList;
                   sourceColumn.makeStructIndex = unnestedColumn.makeStructIndex;
@@ -241,7 +246,7 @@ public class ASTExplorer {
                         column.getColumn().getId(),
                         (long) node.getOutputColumnList().indexOf(column),
                         column.getColumn().getType(),
-                        0L);
+                        0L,new HashSet<>(), null);
                 outputColumn.columnsReferenced.add(deepCloner(sourceColumn));
                 withColumns.add(outputColumn);
               }
@@ -293,7 +298,7 @@ public class ASTExplorer {
                         column.getColumn().getId(),
                         (long) node.getOutputColumnList().indexOf(column),
                         column.getColumn().getType(),
-                        0L);
+                        0L, new HashSet<>(), null);
                 sourceColumn.indexStructList = unnestedColumn.indexStructList;
                 sourceColumn.originalIndexStructList = unnestedColumn.originalIndexStructList;
                 sourceColumn.makeStructIndex = unnestedColumn.makeStructIndex;
@@ -309,7 +314,8 @@ public class ASTExplorer {
                       column.getColumn().getId(),
                       (long) node.getOutputColumnList().indexOf(column),
                       column.getColumn().getType(),
-                      0L);
+                      0L,
+                      new HashSet<>(), null);
               outputColumn.columnsReferenced.add(deepCloner(sourceColumn));
               withColumns.add(outputColumn);
             }
@@ -361,6 +367,14 @@ public class ASTExplorer {
         for (ResolvedColumnExtended column : table.extra_columns) {
           connectAllTables(column);
         }
+        for (ResolvedJoinExtended join: joins) {
+          for (ResolvedColumnExtended column : join.left ) {
+            connectAllTables(column);
+          }
+          for (ResolvedColumnExtended column : join.right ) {
+            connectAllTables(column);
+          }
+        }
       }
     });
     return simplifyTable(table);
@@ -395,6 +409,14 @@ public class ASTExplorer {
         }
         for (ResolvedColumnExtended column : table.extra_columns) {
           connectAllTables(column);
+        }
+        for (ResolvedJoinExtended join: joins) {
+          for (ResolvedColumnExtended column : join.left ) {
+            connectAllTables(column);
+          }
+          for (ResolvedColumnExtended column : join.right ) {
+            connectAllTables(column);
+          }
         }
       }
     });
@@ -537,6 +559,7 @@ public class ASTExplorer {
           }
           index++;
         }
+        table.name = node.getTable().getName();
         table.columns = sourceColumns;
       }
     });
@@ -560,13 +583,21 @@ public class ASTExplorer {
           column.columnsReferenced.addAll(checkNodeType(sourceColumn).columns);
 
           if (node.getOrderBy() != null) {
-            column.columnsReferenced.addAll(checkNodeType(node.getOrderBy()).columns);
+            ResolvedNodeExtended orderByColumns = checkNodeType(node.getOrderBy());
+            for (ResolvedColumnExtended resolvedColumn : orderByColumns.columns) {
+              resolvedColumn.usedFor.add(ResolvedColumnExtended.EXTRACOLUMNS.PARTITION_BY_ANALYTIC_FUNCTION);
+            }
+            column.columnsReferenced.addAll(orderByColumns.columns);
           } else {
             column.columnsReferenced.add(
                 new ResolvedColumnExtended("_literal_", "_literal_", -1L, -1L, null));
           }
           if (node.getPartitionBy() != null) {
-            column.columnsReferenced.addAll(checkNodeType(node.getPartitionBy()).columns);
+            ResolvedNodeExtended partitionByColumns = checkNodeType(node.getPartitionBy());
+            for (ResolvedColumnExtended resolvedColumn : partitionByColumns.columns) {
+              resolvedColumn.usedFor.add(ResolvedColumnExtended.EXTRACOLUMNS.PARTITION_BY_ANALYTIC_FUNCTION);
+            }
+            column.columnsReferenced.addAll(partitionByColumns.columns);
           } else {
             column.columnsReferenced.add(
                 new ResolvedColumnExtended("_literal_", "_literal_", -1L, -1L, null));
@@ -709,8 +740,10 @@ public class ASTExplorer {
         ResolvedNodeExtended filterColumns = checkNodeType(node.getFilterExpr());
 
         for (ResolvedColumnExtended column : filterColumns.columns) {
+          column.usedFor.add(ResolvedColumnExtended.EXTRACOLUMNS.FILTER);
           connectChildrenRefs(column, sourceTable.columns);
         }
+
         table.extra_columns.addAll(filterColumns.columns);
         table.extra_columns.addAll(sourceTable.extra_columns);
         table.columns = sourceTable.columns;
@@ -732,6 +765,7 @@ public class ASTExplorer {
           orderColumns.addAll(checkNodeType(item.getColumnRef()).columns);
         }
         for (ResolvedColumnExtended column : orderColumns) {
+          column.usedFor.add(ResolvedColumnExtended.EXTRACOLUMNS.ORDER_BY);
           connectChildrenRefs(column, sourceTable.columns);
         }
         table.columns = sourceTable.columns;
@@ -790,19 +824,36 @@ public class ASTExplorer {
         if (node.getJoinExpr() != null) {
           table.extra_columns.addAll(checkNodeType(node.getJoinExpr()).columns);
         }
+        List<ResolvedColumnExtended> left = new ArrayList<>();
         for (ResolvedColumnExtended sourceColumn : table.extra_columns) {
-          connectChildrenRefs(sourceColumn, leftJoin.columns);
+          if (connectChildrenRefs(sourceColumn, leftJoin.columns)){
+            sourceColumn.usedFor.add(ResolvedColumnExtended.EXTRACOLUMNS.JOIN_LEFT_TABLE);
+            sourceColumn.joinType = node.getJoinType();
+            left.add(sourceColumn);
+          }
+        }
+        List<ResolvedColumnExtended> right = new ArrayList<>();
+        for (ResolvedColumnExtended sourceColumn : table.extra_columns) {
+          if (connectChildrenRefs(sourceColumn, rightJoin.columns)){
+            sourceColumn.usedFor.add(ResolvedColumnExtended.EXTRACOLUMNS.JOIN_RIGHT_TABLE);
+            sourceColumn.joinType = node.getJoinType();
+            right.add(sourceColumn);
+          }
         }
 
-        for (ResolvedColumnExtended sourceColumn : table.extra_columns) {
-          connectChildrenRefs(sourceColumn, rightJoin.columns);
+        if (left.isEmpty() && right.isEmpty() && node.getJoinType() == ResolvedJoinScanEnums.JoinType.INNER) {
+          joins.add(new ResolvedJoinExtended("CROSS",leftJoin.columns, rightJoin.columns));
+        } else {
+          joins.add(new ResolvedJoinExtended(node.getJoinType().toString(), left, right));
         }
+
         scanColumns.addAll(leftJoin.columns);
         scanColumns.addAll(rightJoin.columns);
         table.extra_columns.addAll(leftJoin.extra_columns);
         table.extra_columns.addAll(rightJoin.extra_columns);
 
         table.columns = scanColumns;
+
       }
     });
 
@@ -855,11 +906,13 @@ public class ASTExplorer {
         for (ResolvedNodes.ResolvedComputedColumn column : node.getGroupByList()) {
           ResolvedNodeExtended groupByColumns = checkNodeType(column);
           for (ResolvedColumnExtended sourceColumn : groupByColumns.columns) {
+            sourceColumn.usedFor.add(ResolvedColumnExtended.EXTRACOLUMNS.GROUP_BY);
             connectChildrenRefs(sourceColumn, groupedColumns.columns);
           }
 
           scanColumns.addAll(groupByColumns.columns);
           extra_columns.addAll(groupByColumns.extra_columns);
+          extra_columns.addAll(groupByColumns.columns);
         }
         for (ResolvedNodes.ResolvedComputedColumn column : node.getAggregateList()) {
           ResolvedNodeExtended aggregatedColumns = checkNodeType(column);
@@ -1152,7 +1205,7 @@ public class ASTExplorer {
 
     ResolvedColumnExtended newColumn = new ResolvedColumnExtended(column.name,
         column.tableName, column.indexOriginalTable, column.resolvedIndex, column.type,
-        0L);
+        0L, new HashSet<>(column.usedFor),column.joinType);
     newColumn.indexStructList = new LinkedList<>(column.indexStructList);
     newColumn.literalValue = column.literalValue;
     newColumn.originalIndexStructList = new LinkedList<>(column.originalIndexStructList);
@@ -1306,14 +1359,14 @@ public class ASTExplorer {
   }
 
 
-  public void connectChildrenRefs(ResolvedColumnExtended currentObject,
+  public boolean connectChildrenRefs(ResolvedColumnExtended currentObject,
                                   List<ResolvedColumnExtended> columnList) {
-
+    boolean connected = false;
     //get all child-URIs for the category
     List<ResolvedColumnExtended> objectChildren = currentObject.columnsReferenced;
 
     if (objectChildren.size() == 0) {
-      iterateOverNodes(columnList, currentObject);
+      connected = iterateOverNodes(columnList, currentObject) || connected;
 
     } else {
       for (ResolvedColumnExtended childObj : objectChildren) {
@@ -1321,30 +1374,34 @@ public class ASTExplorer {
         if (childObj != null) {
 
           if (childObj.columnsReferenced.size() > 0) {
-            connectChildrenRefs(childObj, columnList);
+            connected = connectChildrenRefs(childObj, columnList) || connected;
           } else {
-            iterateOverNodes(columnList, childObj);
+            connected = iterateOverNodes(columnList, childObj) || connected;
           }
         }
       }
     }
+    return connected;
   }
 
-  private void iterateOverNodes(final List<ResolvedColumnExtended> columnList,
+  private boolean iterateOverNodes(final List<ResolvedColumnExtended> columnList,
                                 final ResolvedColumnExtended childObj) {
     List<ResolvedColumnExtended> columnsToAdd = new ArrayList<>();
-
+    boolean connected = false;
     for (ResolvedColumnExtended column : columnList) {
       if (column.resolvedIndex.longValue() == childObj.resolvedIndex.longValue()) {
         if (column.type.isStruct() && listOfNames(column.type.asStruct(), column.name).contains(
             childObj.name) && column.columnsReferenced.size() == 0) {
           childObj.indexOriginalTable = column.indexOriginalTable;
+          connected = true;
         } else if (column.type.isArray() && listOfNames(column.type.asArray(),
             column.name).contains(
             childObj.name) && column.columnsReferenced.size() == 0) {
           childObj.indexOriginalTable = column.indexOriginalTable;
+          connected = true;
         } else {
           columnsToAdd.add(deepCloner(column));
+          connected = true;
         }
       }
     }
@@ -1399,6 +1456,10 @@ public class ASTExplorer {
       prunedColumnsToAdd.addAll(columnsToAdd);
     }
     childObj.columnsReferenced.addAll(prunedColumnsToAdd);
+    if(prunedColumnsToAdd.size() > 0) {
+      connected = true;
+    }
+    return connected;
   }
 
   private List<String> listOfNames(StructType root, String parentStructName) {
@@ -1452,7 +1513,7 @@ public class ASTExplorer {
       } else {
         ResolvedColumnExtended column =
             new ResolvedColumnExtended(parentStructName + "." + field.getName(),
-                tableName, -1L, id, field.getType(), 0L);
+                tableName, -1L, id, field.getType(), 0L, new HashSet<>(),null);
         column.indexStructList.add(indexStruct);
         column.originalIndexStructList.add(indexStruct);
         columns.add(column);
@@ -1480,7 +1541,7 @@ public class ASTExplorer {
       columns.addAll(nestedColumns);
     } else {
       ResolvedColumnExtended column = new ResolvedColumnExtended(parentStructName,
-          tableName, -1L, id, root.getElementType(), 0L);
+          tableName, -1L, id, root.getElementType(), 0L, new HashSet<>(), null);
       column.indexStructList.add(indexStructNew);
       column.originalIndexStructList.add(indexStructNew);
       columns.add(column);
@@ -1526,7 +1587,7 @@ public class ASTExplorer {
         ResolvedColumnExtended column =
             new ResolvedColumnExtended(parentStructName + "." + fieldName,
                 resolvedColumn.getTableName(), originalIndex, resolvedColumn.getId(),
-                field.getType(), indexStruct);
+                field.getType(), indexStruct, new HashSet<>(), null);
         column.indexStructList.add(indexStruct);
         column.originalIndexStructList.add(indexStruct);
         column.makeStructIndex.add(indexStruct);
@@ -1557,7 +1618,7 @@ public class ASTExplorer {
     } else {
       ResolvedColumnExtended column = new ResolvedColumnExtended(parentStructName,
           resolvedColumn.getTableName(), originalIndex, resolvedColumn.getId(),
-          root.getElementType(), 0L);
+          root.getElementType(), 0L, new HashSet<>(), null);
       column.indexStructList.add(carriedIndex);
       column.originalIndexStructList.add(carriedIndex);
       column.makeStructIndex.add(carriedIndex);
@@ -1586,11 +1647,13 @@ public class ASTExplorer {
           && node.resolvedIndex.equals(child.resolvedIndex)) {
         node.columnsReferenced = child.columnsReferenced;
         node.indexOriginalTable = child.indexOriginalTable;
+        node.usedFor.addAll(child.usedFor);
         simplifyNodes(node);
       } else if (node.name.startsWith(child.name) && node.tableName.equals(child.tableName)
                  && node.resolvedIndex.equals(child.resolvedIndex)) {
         node.columnsReferenced = child.columnsReferenced;
         node.indexOriginalTable = child.indexOriginalTable;
+        node.usedFor.addAll(child.usedFor);
         simplifyNodes(node);
       }
     }

@@ -1,7 +1,9 @@
 package com.borjav.data.output;
 
+import com.borjav.data.model.ResolvedColumnExtended;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.zetasql.resolvedast.ResolvedJoinScanEnums;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -18,8 +20,11 @@ public class OutputModel {
     @JsonProperty("output_columns")
     public List<OutputColumn> output_columns = new ArrayList<>();
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("other_scanned_columns")
-    public HashSet<Column> other_scanned_columns;
+    @JsonProperty("joins")
+    public HashSet<Join> joins;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("filters_groupbys_and_other_columns")
+    public HashSet<Column> filters_groupbys_and_other_columns;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("tables")
     public List<Table> tables;
@@ -33,6 +38,17 @@ public class OutputModel {
     @JsonProperty("error")
     public String error;
 
+
+  }
+
+  public static class Join {
+    @JsonProperty("join_type")
+    public String join_type;
+    @JsonProperty("left_columns")
+    public List<OutputColumn> left_columns = new ArrayList<>();
+    @JsonProperty("right_columns")
+    public List<OutputColumn> right_columns = new ArrayList<>();
+
   }
 
   public static class Table {
@@ -42,8 +58,8 @@ public class OutputModel {
     @JsonProperty("columns")
     public HashSet<Column> columns = new HashSet<>();
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("other_scanned_columns")
-    public HashSet<Column> other_scanned_columns;
+    @JsonProperty("filters_groupbys_and_other_columns")
+    public HashSet<Column> filters_groupbys_and_other_columns;
 
   }
 
@@ -94,6 +110,13 @@ public class OutputModel {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("literal_value")
     public List<String> literal_value;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("used_for")
+    public HashSet<ResolvedColumnExtended.EXTRACOLUMNS> used_for;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("join_type")
+    public ResolvedJoinScanEnums.JoinType join_type;
+
 
     public void setNameSplit(String table_name, String name) {
       String[] split = table_name.split("\\.");
@@ -118,7 +141,9 @@ public class OutputModel {
       return Objects.equals(table_name, column.table_name) && Objects.equals(name, column.name)
              && Objects.equals(dataset_name, column.dataset_name)
              && Objects.equals(references, column.references) && Objects.equals(literal_value,
-          column.literal_value);
+          column.literal_value) && Objects.equals(used_for,
+          column.used_for) && Objects.equals(join_type,
+          column.join_type);
     }
 
     @Override

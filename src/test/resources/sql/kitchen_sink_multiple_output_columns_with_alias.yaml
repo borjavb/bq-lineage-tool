@@ -28,20 +28,29 @@ expected_output:
           dataset_name: "datasetA"
           table_name: "TableA"
           name: "colA"
-  other_scanned_columns:
-    - name: "_colC_"
-      references:
-        - project_name: "project1"
-          dataset_name: "datasetA"
-          table_name: "TableA"
-          name: "colC"
-    - name: "_colC_"
-      references:
-        - project_name: "project2"
-          dataset_name: "datasetB"
-          table_name: "TableB"
-          name: "colC"
+  filters_groupbys_and_other_columns: []
+  joins:
+    - join_type: "LEFT"
+      left_columns:
+        - name: "colC"
+          references:
+            - project_name: "project1"
+              dataset_name: "datasetA"
+              table_name: "TableA"
+              name: "colC"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+      right_columns:
+        - name: "colC"
+          references:
+            - project_name: "project2"
+              dataset_name: "datasetB"
+              table_name: "TableB"
+              name: "colC"
+              used_for:
+                - "JOIN_RIGHT_TABLE"
   type: "select"
   selected_tables:
     - "project1.datasetA.TableA"
     - "project2.datasetB.TableB"
+

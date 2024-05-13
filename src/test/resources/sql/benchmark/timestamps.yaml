@@ -39,25 +39,31 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "timestamps"
           name: "_TABLE_SUFFIX"
-  other_scanned_columns:
-    - name: "_time_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "timestamps"
-          name: "_TABLE_SUFFIX"
-    - name: "_source_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "timestamps"
-          name: "source"
+  filters_groupbys_and_other_columns:
     - name: "__TABLE_SUFFIX_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "timestamps"
           name: "_TABLE_SUFFIX"
+          used_for:
+            - "FILTER"
+    - name: "_source_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "source"
+          used_for:
+            - "FILTER"
+    - name: "_time_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "timestamps"
+          name: "_TABLE_SUFFIX"
+          used_for:
+            - "ORDER_BY"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.timestamps"

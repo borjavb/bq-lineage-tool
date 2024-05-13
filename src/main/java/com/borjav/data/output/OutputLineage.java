@@ -1,6 +1,7 @@
 package com.borjav.data.output;
 
 import com.borjav.data.model.ResolvedColumnExtended;
+import com.borjav.data.model.ResolvedJoinExtended;
 import com.borjav.data.model.ResolvedNodeExtended;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,7 @@ public class OutputLineage {
         if (printLeafs || !column.name.equals("_literal_")) {
           OutputModel.OutputColumn outputColumn = new OutputModel.OutputColumn();
           outputColumn.name = column.name;
+
           for (var leaf : getAllLeafs(column, 0, printLeafs)) {
             if (outputColumn.references == null) {
               outputColumn.references = new HashSet<>();
@@ -31,6 +33,11 @@ public class OutputLineage {
             if (leaf.name.equals("_literal_") && leaf.literalValue != null
                 && !leaf.literalValue.equals("")) {
               newColumn.literal_value = ImmutableList.of(leaf.literalValue);
+            }
+            if (newColumn.used_for == null && column.usedFor != null && column.usedFor.size() > 0) {
+              newColumn.used_for = new HashSet<>();
+              newColumn.used_for.addAll(column.usedFor);
+
             }
             outputColumn.references.add(newColumn);
             if (!leaf.name.equals("_literal_")) {
@@ -56,16 +63,129 @@ public class OutputLineage {
                 && !leaf.literalValue.equals("")) {
               newColumn.literal_value = ImmutableList.of(leaf.literalValue);
             }
+            if (newColumn.used_for == null && column.usedFor != null && column.usedFor.size() > 0) {
+              newColumn.used_for = new HashSet<>();
+              newColumn.used_for.addAll(column.usedFor);
+
+            }
+            if (column.joinType != null) {
+              newColumn.join_type = column.joinType;
+            }
             if (!leaf.name.equals("_literal_")) {
               model.selected_tables.add(leaf.tableName);
             }
           }
-          if (model.other_scanned_columns == null) {
-            model.other_scanned_columns = new HashSet<>();
+          if (model.filters_groupbys_and_other_columns == null) {
+            model.filters_groupbys_and_other_columns = new HashSet<>();
           }
-          model.other_scanned_columns.add(outputColumn);
+          //we export the joins in a different struct
+          if (column.joinType == null) {
+            model.filters_groupbys_and_other_columns.add(outputColumn);
+          }
         }
       }
+
+      ///joins
+      for (ResolvedJoinExtended join : table.joins) {
+        OutputModel.Join outputJoin = new OutputModel.Join();
+        outputJoin.join_type = join.join_type.name();
+        if (join.join_type != ResolvedJoinExtended.JOIN_TYPE.CROSS) {
+          for (ResolvedColumnExtended column : join.left) {
+
+            OutputModel.OutputColumn outputColumn = new OutputModel.OutputColumn();
+            outputColumn.name = column.name;
+
+            for (var leaf : getAllLeafs(column, 0, printLeafs)) {
+              if (outputColumn.references == null) {
+                outputColumn.references = new HashSet<>();
+              }
+              OutputModel.Column newColumn = new OutputModel.Column();
+              newColumn.setNameSplit(leaf.tableName, leaf.name);
+              if (leaf.name.equals("_literal_") && leaf.literalValue != null
+                  && !leaf.literalValue.equals("")) {
+                newColumn.literal_value = ImmutableList.of(leaf.literalValue);
+              }
+              if (newColumn.used_for == null && column.usedFor != null
+                  && column.usedFor.size() > 0) {
+                newColumn.used_for = new HashSet<>();
+                newColumn.used_for.addAll(column.usedFor);
+
+              }
+              outputColumn.references.add(newColumn);
+
+            }
+            outputJoin.left_columns.add(outputColumn);
+          }
+          for (ResolvedColumnExtended column : join.right) {
+
+            OutputModel.OutputColumn outputColumn = new OutputModel.OutputColumn();
+            outputColumn.name = column.name;
+
+            for (var leaf : getAllLeafs(column, 0, printLeafs)) {
+              if (outputColumn.references == null) {
+                outputColumn.references = new HashSet<>();
+              }
+              OutputModel.Column newColumn = new OutputModel.Column();
+              newColumn.setNameSplit(leaf.tableName, leaf.name);
+              if (leaf.name.equals("_literal_") && leaf.literalValue != null
+                  && !leaf.literalValue.equals("")) {
+                newColumn.literal_value = ImmutableList.of(leaf.literalValue);
+              }
+              if (newColumn.used_for == null && column.usedFor != null
+                  && column.usedFor.size() > 0) {
+                newColumn.used_for = new HashSet<>();
+                newColumn.used_for.addAll(column.usedFor);
+
+              }
+              outputColumn.references.add(newColumn);
+
+            }
+            outputJoin.right_columns.add(outputColumn);
+          }
+        }else{
+          for (ResolvedColumnExtended column : join.left) {
+            OutputModel.OutputColumn outputColumn = new OutputModel.OutputColumn();
+            outputColumn.name = "_cross_join_all_columns_";
+            HashSet<String> sources = new HashSet<>();
+            for (var leaf : getAllLeafs(column, 0, printLeafs)) {
+              sources.add(leaf.tableName);
+            }
+            for (String ele : sources) {
+              OutputModel.Column newColumn = new OutputModel.Column();
+              newColumn.setNameSplit(ele,null);
+              if (outputColumn.references == null) {
+                outputColumn.references = new HashSet<>();
+              }
+              outputColumn.references.add(newColumn);
+            }
+            outputJoin.left_columns.add(outputColumn);
+          }
+          for (ResolvedColumnExtended column : join.right) {
+            OutputModel.OutputColumn outputColumn = new OutputModel.OutputColumn();
+            outputColumn.name = "_cross_join_all_columns_";
+            HashSet<String> sources = new HashSet<>();
+            for (var leaf : getAllLeafs(column, 0, printLeafs)) {
+              sources.add(leaf.tableName);
+            }
+            for (String ele : sources) {
+              OutputModel.Column newColumn = new OutputModel.Column();
+              newColumn.setNameSplit(ele,null);
+              if (outputColumn.references == null) {
+                outputColumn.references = new HashSet<>();
+              }
+              outputColumn.references.add(newColumn);
+            }
+            outputJoin.right_columns.add(outputColumn);
+          }
+
+        }
+
+        if (model.joins == null) {
+          model.joins = new HashSet<>();
+        }
+        model.joins.add(outputJoin);
+      }
+
     } else {
       model = new OutputModel.Model();
       model.name = tableName;
