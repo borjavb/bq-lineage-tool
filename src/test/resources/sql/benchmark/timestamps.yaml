@@ -39,7 +39,7 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "timestamps"
           name: "_TABLE_SUFFIX"
-  filters_groupbys_and_other_columns:
+  other_used_columns:
     - name: "__TABLE_SUFFIX_"
       references:
         - project_name: "catalog"

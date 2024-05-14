@@ -108,7 +108,6 @@ public class ASTExplorer {
     }
   }
 
-
   private ResolvedNodeExtended ResolvedQueryStmt(ResolvedNodes.ResolvedQueryStmt stmt) {
 
     ResolvedNodeExtended table = new ResolvedNodeExtended();

@@ -13,7 +13,7 @@ expected_output:
       references:
         - table_name: "$union_all"
           name: "n"
-  filters_groupbys_and_other_columns:
+  other_used_columns:
     - name: "_n_"
       references:
         - table_name: "$union_all"

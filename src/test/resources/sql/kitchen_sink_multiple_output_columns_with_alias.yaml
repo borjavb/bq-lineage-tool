@@ -28,7 +28,7 @@ expected_output:
           dataset_name: "datasetA"
           table_name: "TableA"
           name: "colA"
-  filters_groupbys_and_other_columns: []
+  other_used_columns: []
   joins:
     - join_type: "LEFT"
       left_columns:

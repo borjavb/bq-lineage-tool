@@ -157,7 +157,7 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "stg_customers"
           name: "first_name"
-  filters_groupbys_and_other_columns:
+  other_used_columns:
     - name: "_$analytic1_"
       references:
         - project_name: "catalog"

@@ -91,7 +91,7 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "stg_payments"
           name: "amount"
-  filters_groupbys_and_other_columns:
+  other_used_columns:
     - name: "_customer_id_"
       references:
         - project_name: "catalog"

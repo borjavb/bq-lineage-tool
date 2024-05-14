@@ -23,8 +23,14 @@ public class OutputModel {
     @JsonProperty("joins")
     public HashSet<Join> joins;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("filters_groupbys_and_other_columns")
-    public HashSet<Column> filters_groupbys_and_other_columns;
+    @JsonProperty("filters")
+    public HashSet<Column>  filters;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("aggregations")
+    public HashSet<Column>   aggregations;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("other_used_columns")
+    public HashSet<Column> other_used_columns;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("tables")
     public List<Table> tables;
@@ -51,6 +57,7 @@ public class OutputModel {
 
   }
 
+
   public static class Table {
 
     @JsonProperty("name")
@@ -58,8 +65,8 @@ public class OutputModel {
     @JsonProperty("columns")
     public HashSet<Column> columns = new HashSet<>();
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("filters_groupbys_and_other_columns")
-    public HashSet<Column> filters_groupbys_and_other_columns;
+    @JsonProperty("other_used_columns")
+    public HashSet<Column> other_used_columns;
 
   }
 

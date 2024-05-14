@@ -70,7 +70,7 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "stg_payments"
           name: "payment_method"
-  filters_groupbys_and_other_columns:
+  other_used_columns:
     - name: "__literal__"
       references:
         - table_name: "_literal_"

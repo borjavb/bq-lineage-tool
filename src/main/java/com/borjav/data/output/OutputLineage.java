@@ -37,7 +37,6 @@ public class OutputLineage {
             if (newColumn.used_for == null && column.usedFor != null && column.usedFor.size() > 0) {
               newColumn.used_for = new HashSet<>();
               newColumn.used_for.addAll(column.usedFor);
-
             }
             outputColumn.references.add(newColumn);
             if (!leaf.name.equals("_literal_")) {
@@ -75,12 +74,34 @@ public class OutputLineage {
               model.selected_tables.add(leaf.tableName);
             }
           }
-          if (model.filters_groupbys_and_other_columns == null) {
-            model.filters_groupbys_and_other_columns = new HashSet<>();
-          }
+//          if (model.other_used_columns == null) {
+//            model.other_used_columns = new HashSet<>();
+//          }
           //we export the joins in a different struct
-          if (column.joinType == null) {
-            model.filters_groupbys_and_other_columns.add(outputColumn);
+//          if (column.joinType == null) {
+//            model.other_used_columns.add(outputColumn);
+//          }
+          if (column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.FILTER)) {
+            if (model.filters == null) {
+              model.filters = new HashSet<>();
+            }
+            model.filters.add(outputColumn);
+          }
+          if (column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.GROUP_BY)) {
+            if (model.aggregations == null) {
+              model.aggregations = new HashSet<>();
+            }
+            model.aggregations.add(outputColumn);
+          }
+          if (column.usedFor.size() == 0 || (
+              !column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.FILTER)
+              && !column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.GROUP_BY)
+              && !column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.JOIN_LEFT_TABLE)
+              && !column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.JOIN_RIGHT_TABLE))) {
+            if (model.other_used_columns == null) {
+              model.other_used_columns = new HashSet<>();
+            }
+            model.other_used_columns.add(outputColumn);
           }
         }
       }
@@ -142,7 +163,7 @@ public class OutputLineage {
             }
             outputJoin.right_columns.add(outputColumn);
           }
-        }else{
+        } else {
           for (ResolvedColumnExtended column : join.left) {
             OutputModel.OutputColumn outputColumn = new OutputModel.OutputColumn();
             outputColumn.name = "_cross_join_all_columns_";
@@ -152,7 +173,7 @@ public class OutputLineage {
             }
             for (String ele : sources) {
               OutputModel.Column newColumn = new OutputModel.Column();
-              newColumn.setNameSplit(ele,null);
+              newColumn.setNameSplit(ele, null);
               if (outputColumn.references == null) {
                 outputColumn.references = new HashSet<>();
               }
@@ -162,14 +183,14 @@ public class OutputLineage {
           }
           for (ResolvedColumnExtended column : join.right) {
             OutputModel.OutputColumn outputColumn = new OutputModel.OutputColumn();
-            outputColumn.name = "_cross_join_all_columns_";
+            outputColumn.name = "_cross_join_no_on_clause_";
             HashSet<String> sources = new HashSet<>();
             for (var leaf : getAllLeafs(column, 0, printLeafs)) {
               sources.add(leaf.tableName);
             }
             for (String ele : sources) {
               OutputModel.Column newColumn = new OutputModel.Column();
-              newColumn.setNameSplit(ele,null);
+              newColumn.setNameSplit(ele, null);
               if (outputColumn.references == null) {
                 outputColumn.references = new HashSet<>();
               }

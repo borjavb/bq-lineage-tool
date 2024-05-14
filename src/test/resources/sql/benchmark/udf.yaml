@@ -53,7 +53,7 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "struct_table"
           name: "content.id"
-  filters_groupbys_and_other_columns:
+  other_used_columns:
     - name: "_record_id_"
       references:
         - project_name: "catalog"
