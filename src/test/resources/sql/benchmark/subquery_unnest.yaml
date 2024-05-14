@@ -59,21 +59,32 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
           name: "nested_ids.amount"
-  other_used_columns:
-    - name: "_cost_"
+  filters:
+    - name: "__PARTITIONTIME_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
-          name: "cost"
+          name: "_PARTITIONTIME"
           used_for:
-            - "ORDER_BY"
+            - "FILTER"
+    - name: "_rescordenesed.anothernesting23_"
+      references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
-          name: "nested_ids.amount"
+          name: "rescordenesed.anothernesting23"
           used_for:
-            - "ORDER_BY"
+            - "FILTER"
+  aggregations:
+    - name: "_project_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "acolumn.id"
+          used_for:
+            - "GROUP_BY"
     - name: "_job_id_"
       references:
         - project_name: "catalog"
@@ -90,30 +101,6 @@ expected_output:
           name: "rescordenesed.anothernesting2"
           used_for:
             - "GROUP_BY"
-    - name: "_project_id_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "nested_table"
-          name: "acolumn.id"
-          used_for:
-            - "GROUP_BY"
-    - name: "_rescordenesed.anothernesting23_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "nested_table"
-          name: "rescordenesed.anothernesting23"
-          used_for:
-            - "FILTER"
-    - name: "__PARTITIONTIME_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "nested_table"
-          name: "_PARTITIONTIME"
-          used_for:
-            - "FILTER"
     - name: "_labels_"
       references:
         - project_name: "catalog"
@@ -128,6 +115,21 @@ expected_output:
           name: "labels.value"
           used_for:
             - "GROUP_BY"
+  other_used_columns:
+    - name: "_cost_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+          used_for:
+            - "ORDER_BY"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.amount"
+          used_for:
+            - "ORDER_BY"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.nested_table"

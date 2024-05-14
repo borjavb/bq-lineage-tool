@@ -102,23 +102,24 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
           name: "rescordenesed.anothernesting"
-  other_used_columns:
-    - name: "_clmn1__"
+  filters:
+    - name: "_date_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
-          name: "rescordenesed.anothernesting"
+          name: "anotherdate"
           used_for:
+            - "FILTER"
             - "GROUP_BY"
-    - name: "_anothernesting_"
+    - name: "__PARTITIONTIME_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
-          name: "rescordenesed.anothernesting"
+          name: "_PARTITIONTIME"
           used_for:
-            - "GROUP_BY"
+            - "FILTER"
     - name: "_acolumn.id_"
       references:
         - project_name: "catalog"
@@ -127,14 +128,14 @@ expected_output:
           name: "acolumn.id"
           used_for:
             - "FILTER"
-    - name: "_resource_type_"
+    - name: "_clmn100000__"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
-          name: "labels.value"
+          name: "cost"
           used_for:
-            - "GROUP_BY"
+            - "FILTER"
     - name: "_c.cost_"
       references:
         - project_name: "catalog"
@@ -149,20 +150,13 @@ expected_output:
           name: "rescordenesed.anothernesting"
           used_for:
             - "FILTER"
-    - name: "__PARTITIONTIME_"
+  aggregations:
+    - name: "_clmn1__"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
-          name: "_PARTITIONTIME"
-          used_for:
-            - "FILTER"
-    - name: "_description_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "nested_table"
-          name: "cost"
+          name: "rescordenesed.anothernesting"
           used_for:
             - "GROUP_BY"
     - name: "_date_"
@@ -182,14 +176,22 @@ expected_output:
           name: "anotherdate"
           used_for:
             - "GROUP_BY"
-    - name: "_clmn100000__"
+    - name: "_anothernesting_"
       references:
         - project_name: "catalog"
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
-          name: "cost"
+          name: "rescordenesed.anothernesting"
           used_for:
-            - "FILTER"
+            - "GROUP_BY"
+    - name: "_resource_type_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "labels.value"
+          used_for:
+            - "GROUP_BY"
     - name: "_first_name_"
       references:
         - project_name: "catalog"
@@ -198,8 +200,17 @@ expected_output:
           name: "first_name"
           used_for:
             - "GROUP_BY"
+    - name: "_description_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "cost"
+          used_for:
+            - "GROUP_BY"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.nested_table"
+
 
 

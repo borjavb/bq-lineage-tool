@@ -158,37 +158,6 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "stg_customers"
           name: "first_name"
-  other_used_columns:
-    - name: "_$analytic1_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_orders"
-          name: "customer_id"
-          used_for:
-            - "FILTER"
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_orders"
-          name: "order_date"
-          used_for:
-            - "FILTER"
-    - name: "_order_date_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_orders"
-          name: "order_date"
-          used_for:
-            - "FILTER"
-    - name: "_customer_id_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_orders"
-          name: "customer_id"
-          used_for:
-            - "GROUP_BY"
   joins:
     - join_type: "LEFT"
       left_columns:
@@ -247,8 +216,41 @@ expected_output:
               name: "customer_id"
               used_for:
                 - "JOIN_RIGHT_TABLE"
+  filters:
+    - name: "_order_date_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_orders"
+          name: "order_date"
+          used_for:
+            - "FILTER"
+    - name: "_$analytic1_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_orders"
+          name: "customer_id"
+          used_for:
+            - "FILTER"
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_orders"
+          name: "order_date"
+          used_for:
+            - "FILTER"
+  aggregations:
+    - name: "_customer_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_orders"
+          name: "customer_id"
+          used_for:
+            - "GROUP_BY"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.stg_orders"
     - "catalog.jaffle_shop.stg_customers"
     - "catalog.jaffle_shop.stg_payments"
+

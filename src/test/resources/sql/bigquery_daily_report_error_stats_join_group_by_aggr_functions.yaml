@@ -34,15 +34,6 @@ expected_output:
           dataset_name: "reporting"
           table_name: "error_stats"
           name: "status_200"
-  other_used_columns:
-    - name: "_partner_id_"
-      references:
-        - project_name: "myproject"
-          dataset_name: "reporting"
-          table_name: "daily_report"
-          name: "partner_id"
-          used_for:
-            - "GROUP_BY"
   joins:
     - join_type: "LEFT"
       left_columns:
@@ -63,7 +54,17 @@ expected_output:
               name: "partner_id"
               used_for:
                 - "JOIN_RIGHT_TABLE"
+  aggregations:
+    - name: "_partner_id_"
+      references:
+        - project_name: "myproject"
+          dataset_name: "reporting"
+          table_name: "daily_report"
+          name: "partner_id"
+          used_for:
+            - "GROUP_BY"
   type: "select"
   selected_tables:
     - "myproject.reporting.error_stats"
     - "myproject.reporting.daily_report"
+

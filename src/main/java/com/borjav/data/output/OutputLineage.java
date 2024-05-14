@@ -9,6 +9,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class OutputLineage {
@@ -83,13 +84,13 @@ public class OutputLineage {
 //          }
           if (column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.FILTER)) {
             if (model.filters == null) {
-              model.filters = new HashSet<>();
+              model.filters = new LinkedHashSet<>();
             }
             model.filters.add(outputColumn);
           }
           if (column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.GROUP_BY)) {
             if (model.aggregations == null) {
-              model.aggregations = new HashSet<>();
+              model.aggregations = new LinkedHashSet<>();
             }
             model.aggregations.add(outputColumn);
           }
@@ -99,7 +100,7 @@ public class OutputLineage {
               && !column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.JOIN_LEFT_TABLE)
               && !column.usedFor.contains(ResolvedColumnExtended.EXTRACOLUMNS.JOIN_RIGHT_TABLE))) {
             if (model.other_used_columns == null) {
-              model.other_used_columns = new HashSet<>();
+              model.other_used_columns = new LinkedHashSet<>();
             }
             model.other_used_columns.add(outputColumn);
           }
@@ -202,7 +203,7 @@ public class OutputLineage {
         }
 
         if (model.joins == null) {
-          model.joins = new HashSet<>();
+          model.joins = new LinkedHashSet<>();
         }
         model.joins.add(outputJoin);
       }
@@ -217,12 +218,12 @@ public class OutputLineage {
   }
 
 
-  public String toYaml(ResolvedNodeExtended table, String tableName, boolean printLeafs) {
+  public String toYaml(ResolvedNodeExtended table, String tableName, boolean printLiterals) {
     YAMLFactory yf = new YAMLFactory();
     ObjectMapper mapper = new ObjectMapper(yf);
     try {
       return mapper.writerWithDefaultPrettyPrinter()
-          .writeValueAsString(toModel(table, tableName, null, printLeafs));
+          .writeValueAsString(toModel(table, tableName, null, printLiterals));
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }

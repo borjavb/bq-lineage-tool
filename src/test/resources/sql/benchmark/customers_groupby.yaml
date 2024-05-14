@@ -91,70 +91,7 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "stg_payments"
           name: "amount"
-  other_used_columns:
-    - name: "_customer_id_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_customers"
-          name: "customer_id"
-          used_for:
-            - "ORDER_BY"
-    - name: "_customer_id_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_customers"
-          name: "customer_id"
-          used_for:
-            - "GROUP_BY"
-    - name: "_customer_id_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_orders"
-          name: "customer_id"
-          used_for:
-            - "GROUP_BY"
   joins:
-    - join_type: "LEFT"
-      left_columns:
-        - name: "customer_id"
-          references:
-            - project_name: "catalog"
-              dataset_name: "jaffle_shop"
-              table_name: "stg_customers"
-              name: "customer_id"
-              used_for:
-                - "JOIN_LEFT_TABLE"
-      right_columns:
-        - name: "customer_id"
-          references:
-            - project_name: "catalog"
-              dataset_name: "jaffle_shop"
-              table_name: "stg_orders"
-              name: "customer_id"
-              used_for:
-                - "JOIN_RIGHT_TABLE"
-    - join_type: "LEFT"
-      left_columns:
-        - name: "customer_id"
-          references:
-            - project_name: "catalog"
-              dataset_name: "jaffle_shop"
-              table_name: "stg_customers"
-              name: "customer_id"
-              used_for:
-                - "JOIN_LEFT_TABLE"
-      right_columns:
-        - name: "customer_id"
-          references:
-            - project_name: "catalog"
-              dataset_name: "jaffle_shop"
-              table_name: "stg_orders"
-              name: "customer_id"
-              used_for:
-                - "JOIN_RIGHT_TABLE"
     - join_type: "LEFT"
       left_columns:
         - name: "order_id"
@@ -174,6 +111,70 @@ expected_output:
               name: "order_id"
               used_for:
                 - "JOIN_RIGHT_TABLE"
+    - join_type: "LEFT"
+      left_columns:
+        - name: "customer_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "stg_customers"
+              name: "customer_id"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+      right_columns:
+        - name: "customer_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "stg_orders"
+              name: "customer_id"
+              used_for:
+                - "JOIN_RIGHT_TABLE"
+    - join_type: "LEFT"
+      left_columns:
+        - name: "customer_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "stg_customers"
+              name: "customer_id"
+              used_for:
+                - "JOIN_LEFT_TABLE"
+      right_columns:
+        - name: "customer_id"
+          references:
+            - project_name: "catalog"
+              dataset_name: "jaffle_shop"
+              table_name: "stg_orders"
+              name: "customer_id"
+              used_for:
+                - "JOIN_RIGHT_TABLE"
+  aggregations:
+    - name: "_customer_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_orders"
+          name: "customer_id"
+          used_for:
+            - "GROUP_BY"
+    - name: "_customer_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_customers"
+          name: "customer_id"
+          used_for:
+            - "GROUP_BY"
+  other_used_columns:
+    - name: "_customer_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_customers"
+          name: "customer_id"
+          used_for:
+            - "ORDER_BY"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.stg_orders"

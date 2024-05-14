@@ -56,7 +56,6 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "nested_table"
           name: "last_name"
-  other_used_columns: [ ]
   joins:
     - join_type: "FULL"
       left_columns:

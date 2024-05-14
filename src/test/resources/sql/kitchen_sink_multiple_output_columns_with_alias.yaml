@@ -28,7 +28,6 @@ expected_output:
           dataset_name: "datasetA"
           table_name: "TableA"
           name: "colA"
-  other_used_columns: []
   joins:
     - join_type: "LEFT"
       left_columns:
@@ -53,4 +52,5 @@ expected_output:
   selected_tables:
     - "project1.datasetA.TableA"
     - "project2.datasetB.TableB"
+
 

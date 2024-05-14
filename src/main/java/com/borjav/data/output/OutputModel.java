@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.zetasql.resolvedast.ResolvedJoinScanEnums;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,16 +22,16 @@ public class OutputModel {
     public List<OutputColumn> output_columns = new ArrayList<>();
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("joins")
-    public HashSet<Join> joins;
+    public LinkedHashSet<Join> joins;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("filters")
-    public HashSet<Column>  filters;
+    public LinkedHashSet<Column>  filters;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("aggregations")
-    public HashSet<Column>   aggregations;
+    public LinkedHashSet<Column>   aggregations;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("other_used_columns")
-    public HashSet<Column> other_used_columns;
+    public LinkedHashSet<Column> other_used_columns;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("tables")
     public List<Table> tables;

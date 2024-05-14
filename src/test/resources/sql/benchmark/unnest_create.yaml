@@ -56,23 +56,6 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "struct_table"
           name: "content.id"
-  other_used_columns:
-    - name: "_record_id_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "nested_table"
-          name: "nested_ids.id"
-          used_for:
-            - "GROUP_BY"
-    - name: "_count_content_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "struct_table"
-          name: "content.id"
-          used_for:
-            - "ORDER_BY"
   joins:
     - join_type: "LEFT"
       left_columns:
@@ -93,6 +76,24 @@ expected_output:
               name: "content.id"
               used_for:
                 - "JOIN_RIGHT_TABLE"
+  aggregations:
+    - name: "_record_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "nested_table"
+          name: "nested_ids.id"
+          used_for:
+            - "GROUP_BY"
+  other_used_columns:
+    - name: "_count_content_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "struct_table"
+          name: "content.id"
+          used_for:
+            - "ORDER_BY"
   type: "create"
   selected_tables:
     - "catalog.jaffle_shop.struct_table"

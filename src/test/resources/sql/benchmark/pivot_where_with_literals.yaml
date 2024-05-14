@@ -70,7 +70,15 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "stg_payments"
           name: "payment_method"
-  other_used_columns:
+  filters:
+    - name: "_payment_method_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_payments"
+          name: "payment_method"
+          used_for:
+            - "FILTER"
     - name: "__literal__"
       references:
         - table_name: "_literal_"
@@ -103,22 +111,6 @@ expected_output:
             - "other"
           used_for:
             - "FILTER"
-    - name: "__literal__"
-      references:
-        - table_name: "_literal_"
-          name: "_literal_"
-          literal_value:
-            - "100000.0"
-          used_for:
-            - "FILTER"
-    - name: "_payment_method_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_payments"
-          name: "payment_method"
-          used_for:
-            - "FILTER"
     - name: "_amount_"
       references:
         - project_name: "catalog"
@@ -127,6 +119,15 @@ expected_output:
           name: "amount"
           used_for:
             - "FILTER"
+    - name: "__literal__"
+      references:
+        - table_name: "_literal_"
+          name: "_literal_"
+          literal_value:
+            - "100000.0"
+          used_for:
+            - "FILTER"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.stg_payments"
+

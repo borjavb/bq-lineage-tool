@@ -73,15 +73,6 @@ expected_output:
   name: "customers"
   output_columns:
     - name: "$col1"
-  other_used_columns:
-    - name: "_customer_id_"
-      references:
-        - project_name: "catalog"
-          dataset_name: "jaffle_shop"
-          table_name: "stg_orders"
-          name: "customer_id"
-          used_for:
-            - "GROUP_BY"
   joins:
     - join_type: "LEFT"
       left_columns:
@@ -140,6 +131,15 @@ expected_output:
               name: "customer_id"
               used_for:
                 - "JOIN_RIGHT_TABLE"
+  aggregations:
+    - name: "_customer_id_"
+      references:
+        - project_name: "catalog"
+          dataset_name: "jaffle_shop"
+          table_name: "stg_orders"
+          name: "customer_id"
+          used_for:
+            - "GROUP_BY"
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.stg_orders"

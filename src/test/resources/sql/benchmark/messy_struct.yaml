@@ -39,7 +39,7 @@ expected_output:
           dataset_name: "jaffle_shop"
           table_name: "struct_table"
           name: "content.id"
-  other_used_columns:
+  filters:
     - name: "_testing2.test.nested_nes.b_"
       references:
         - project_name: "catalog"
@@ -51,3 +51,4 @@ expected_output:
   type: "select"
   selected_tables:
     - "catalog.jaffle_shop.struct_table"
+
